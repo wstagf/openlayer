@@ -1,0 +1,55 @@
+<html>
+<head>
+<style>
+#mapdiv {
+	height: 500px;
+}
+</style>
+</head>
+  <body>
+  <div id="mapdiv"></div>
+  <a href="#" onclick="moverPonto()">Mover Ponto</a>
+  <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+  <script>
+    map = new OpenLayers.Map("mapdiv");
+    map.addLayer(new OpenLayers.Layer.OSM());
+
+    var lonLat = new OpenLayers.LonLat( -49.2567961, -16.6896139  )
+          .transform(
+            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+            map.getProjectionObject() // to Spherical Mercator Projection
+          );
+          
+    var zoom=16;
+
+    var markers = new OpenLayers.Layer.Markers( "Markers" );
+    map.addLayer(markers);
+    
+    markers.addMarker(new OpenLayers.Marker(lonLat));
+
+    
+    var lon = -49.256723;
+    var lat = -16.689333;
+  
+    var moverPonto = function() {
+    	 lon = lon + 0.002;
+    	 lat = lat + 0.003
+        
+    	markers.removeMarker(markers.markers[0]);
+    	
+    	var lonLatNovo = new OpenLayers.LonLat( lon, lat )
+        .transform(
+                new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                map.getProjectionObject() // to Spherical Mercator Projection
+              );
+    	markers.addMarker(new OpenLayers.Marker(lonLatNovo));
+    	console.log(lon)
+    };
+    
+    map.setCenter (lonLat, zoom);
+  </script>
+</body></html>
+
+
+
+
