@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <title>OpenLayers Click Event Example</title>
+        
+        <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+        <script src="https://cdn.rawgit.com/abdmob/x2js/master/xml2json.js"></script>
+        <style type="text/css">
+          html, body, #mapdiv {
+              width:100%; height:100%; margin:0;
+          }
+          
+          .olImageLoadError { display: none; } /* no pink tiles */ 
+        </style>
+  
+        <script type="text/javascript">
+        
+            //Set up a click handler
+            OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+                defaultHandlerOptions: {
+                    'single': true,
+                    'double': true,
+                    'pixelTolerance': 0,
+                    'stopSingle': false,
+                    'stopDouble': false
+                },
+
+                initialize: function(options) {
+                    this.handlerOptions = OpenLayers.Util.extend(
+                        {}, this.defaultHandlerOptions
+                    );
+                    OpenLayers.Control.prototype.initialize.apply(
+                        this, arguments
+                    ); 
+                    this.handler = new OpenLayers.Handler.Click(
+                        this, {
+                            'click': this.trigger,
+                            'dblclick' : this.triggerDouble
+                        }, this.handlerOptions
+                    );
+                }, 
+                
+                trigger: function(e) {
+                    //A click happened!
+           	    	 alert("You clicked near" );
+
+                },
+             
+                triggerDouble: function(e) {
+                	     var lonlat = map.getLonLatFromViewPortPx(e.xy)
+                         
+                         lonlat.transform(
+                           new OpenLayers.Projection("EPSG:900913"), 
+                           new OpenLayers.Projection("EPSG:4326")
+                         );
+                         
+                      //    alert("You clicked near " + lonlat.lat + ", " + lonlat.lon );
+                         
+                         var lonLatNovo = new OpenLayers.LonLat( lonlat.lon, lonlat.lat  )
+                         .transform(
+                                 new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                                 map.getProjectionObject() // to Spherical Mercator Projection
+                               );
+                     	markers.addMarker(new OpenLayers.Marker(lonLatNovo));
+                }
+
+            });
+            
+            var map;
+            function init(){
+                map = new OpenLayers.Map('mapdiv');
+                
+                map.addLayer(new OpenLayers.Layer.OSM());
+              	// federais por estado
+				/*
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-acre.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-alagoas.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-amapa.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-amazonas.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-bahia.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-ceara.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-distritofederal.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-espiritosanto.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-goias.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-maranhao.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-matogrosso.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-matogrossodosul.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-minasgerais.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-para.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-paraiba.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-parana.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-pernambuco.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-piaui.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-riodejaneiro.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-riograndedonorte.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-riograndedosul.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-rondonia.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-roraima.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-santacatarina.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-saopaulo.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-sergipe.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-tocantins.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                */
+                
+                // todas federais do pais
+                /*
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/dnit/rodovias-brasil.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                */
+                
+
+
+                // estaduais - goias
+                /*
+                    map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                        strategies: [new OpenLayers.Strategy.Fixed()],
+                        protocol: new OpenLayers.Protocol.HTTP({
+                            url: "kml/malha_viaria_go.kml",
+                            format: new OpenLayers.Format.KML({
+                                extractStyles: true, 
+                                extractAttributes: true,
+                                maxDepth: 2
+                            })
+                        })
+                    }));
+                */
+
+                  // perimetro urbano cidades - goias
+                /*
+                map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                    strategies: [new OpenLayers.Strategy.Fixed()],
+                    protocol: new OpenLayers.Protocol.HTTP({
+                        url: "kml/perimetrourbanocidadesgo.kml",
+                        format: new OpenLayers.Format.KML({
+                            extractStyles: true, 
+                            extractAttributes: true,
+                            maxDepth: 2
+                        })
+                    })
+                }));
+                */
+
+                // limites dos municipios - goias
+                /*
+                map.addLayer(new OpenLayers.Layer.Vector("KML", {
+                    strategies: [new OpenLayers.Strategy.Fixed()],
+                    protocol: new OpenLayers.Protocol.HTTP({
+                        url: "kml/municipiosgoias.kml",
+                        format: new OpenLayers.Format.KML({
+                            extractStyles: true, 
+                            extractAttributes: true,
+                            maxDepth: 2
+                        })
+                    })
+                }));
+                */
+
+
+                // brasil e estados
+                var brasil = new OpenLayers.Layer.Vector("KML", {
+                    strategies: [new OpenLayers.Strategy.Fixed()],
+                    protocol: new OpenLayers.Protocol.HTTP({
+                        url: "kml/brasil.kml",
+                        format: new OpenLayers.Format.KML({
+                            extractStyles: true, 
+                            extractAttributes: true,
+                            maxDepth: 2
+                        })
+                    })
+                });
+                brasil.setOpacity(0.5);
+                map.addLayer(brasil);
+
+                
+                map.zoomToMaxExtent();
+                
+                var click = new OpenLayers.Control.Click();
+                map.addControl(click);
+                click.activate();
+                
+                
+                map.addLayer(markers);
+                
+               
+               var  pontos = [
+                    {lon: -5360375.918836558, lat: -1743681.4889988198},
+                    {lon: -5267428.492454834, lat: -1744598.7333381313},
+                    {lon: -5263377.32995629, lat: -1811481.1330783586},
+                    {lon: -5367025.940296478, lat: -1810869.6368522055}
+                ];
+
+            var lineLayer = new OpenLayers.Layer.Vector("Line Layer"); 
+            map.addLayer(lineLayer);                    
+            map.addControl(new OpenLayers.Control.DrawFeature(lineLayer, OpenLayers.Handler.Path));           
+            var points = new Array(
+            new OpenLayers.Geometry.Point(pontos[0].lon, pontos[0].lat),
+            new OpenLayers.Geometry.Point(pontos[1].lon, pontos[1].lat),
+            new OpenLayers.Geometry.Point(pontos[2].lon, pontos[2].lat),
+            new OpenLayers.Geometry.Point(pontos[3].lon, pontos[3].lat),
+            new OpenLayers.Geometry.Point(pontos[0].lon, pontos[0].lat),
+            );
+            var line = new OpenLayers.Geometry.LineString(points);
+            var style = { 
+            strokeColor: '#00ffff', 
+            strokeOpacity: 0.9,
+            strokeWidth: 5
+            };
+
+var lineFeature = new OpenLayers.Feature.Vector(line, null, style);
+lineLayer.addFeatures([lineFeature]);
+
+
+            map.setCenter(new OpenLayers.LonLat(0, 5), 3);
+
+            }
+            var markers = new OpenLayers.Layer.Markers( "Markers" );
+
+
+
+            function loadXMLDoc(dname) {
+                if (window.XMLHttpRequest) {
+                    xhttp=new XMLHttpRequest();
+                }
+                else {
+                    xhttp=new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                xhttp.open("GET",dname,false);
+                xhttp.send();
+                return xhttp.responseXML;
+            }
+            var xmlDoc = loadXMLDoc("kml/ibge/go.kml");
+            var x2js = new X2JS();
+            var jsonObj = x2js.xml2json(xmlDoc);
+            var exemplo = jsonObj.kml.Document.Folder.Folder[94].Placemark[20].Polygon.outerBoundaryIs.LinearRing.coordinates
+            var itens = exemplo.split(' ').join('').split(',0')
+            /*
+            var points = new Array(
+            new OpenLayers.Geometry.Point(pontos[0].lon, pontos[0].lat),
+            new OpenLayers.Geometry.Point(pontos[1].lon, pontos[1].lat),
+            new OpenLayers.Geometry.Point(pontos[2].lon, pontos[2].lat),
+            new OpenLayers.Geometry.Point(pontos[3].lon, pontos[3].lat),
+            new OpenLayers.Geometry.Point(pontos[0].lon, pontos[0].lat),
+            );
+            */
+
+        </script>
+    </head>
+    
+  <body onload="init()">
+    <div id="mapdiv"></div>
+    
+  </body>
+</html>
+    
+
+
+<html ng-app>
+<head>
+
+
+<script>
+
+</script>
+</head>
+<body >
+</body>
+</html>
+
